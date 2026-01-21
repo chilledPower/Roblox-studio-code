@@ -1,0 +1,57 @@
+local replicatedStorage = game:GetService("ReplicatedStorage")
+local tweenService = game:GetService("TweenService")
+local players = game:GetService("Players")
+
+local formatNumber = require(replicatedStorage.Libs.FormatNumber)
+
+local player = players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+
+local frame = script.Parent
+local mainFrame = frame.Main
+local profileFrame = frame.ProfileFrame
+local mainProfileFrame = profileFrame.Frame
+local expBar = mainProfileFrame.ExpBar
+
+local expText = mainProfileFrame.ExpText
+
+local overviewFrame = mainFrame.Overview
+
+local killsFrame = overviewFrame.Frame.KFrame
+local streakFrame = overviewFrame.Frame.SFrame
+local gamesPlayedFrame = overviewFrame.Frame.GPFrame
+
+local kills = killsFrame.Number
+local games = gamesPlayedFrame.Number
+local streak = streakFrame.Number
+
+local level = mainProfileFrame.LevelFrame:WaitForChild("TextLabel")
+local rank = mainProfileFrame.rankLabel
+local username = mainProfileFrame.displayNameLabel
+	
+local function updateExpBar()
+	local newSize = UDim2.fromScale(player.GameValues.Exp.Value/player.GameValues.MaxExp.Value, 1)
+	local tween = tweenService:Create(expBar.Frame, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = newSize})
+	tween:Play()
+	
+	expText.Text = formatNumber.Format(player.GameValues.Exp.Value).."/"..formatNumber.Format(player.GameValues.MaxExp.Value).." Exp"
+end
+
+local function UpdateCurrency()
+	kills.Text = formatNumber.Format(player.GameValues.Kills.Value)
+	games.Text = formatNumber.Format(player.GameValues.Games.Value)
+	streak.Text = formatNumber.Format(player.GameValues.Streak.Value)
+	level.Text = formatNumber.Format(player.leaderstats.Level.Value)
+	rank.Text = player.leaderstats.Rank.Value.." Rank"
+end
+
+-- Win 10 games in a row
+
+username.Text = player.DisplayName
+
+task.delay(1, UpdateCurrency)
+task.delay(1, updateExpBar)
+
+player.GameValues.Exp:GetPropertyChangedSignal("Value"):Connect(function()
+	updateExpBar()
+end)
