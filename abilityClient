@@ -64,14 +64,5 @@ replicatedStorage.abilityVfx.OnClientEvent:Connect(function(ability, abilityMode
 
 		task.wait(0.4)
 		abilityModel:Destroy()
-	else
-		local ring = abilityModel:WaitForChild("Ring")
-		local beam = abilityModel:WaitForChild("Beam")
-		
-		tweenService:Create(ring, TweenInfo.new(0.4), {Transparency = 1}):Play()
-		tweenService:Create(beam, TweenInfo.new(0.4), {Transparency = 1}):Play()
-		
-		task.wait(0.4)
-		abilityModel:Destroy()
 	end
 end)
