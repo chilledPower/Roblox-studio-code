@@ -1,0 +1,62 @@
+local replicatedStorage = game:GetService("ReplicatedStorage")
+local runService = game:GetService("RunService")
+
+local natureSword = replicatedStorage:WaitForChild("Nature Sword")
+local tweenService = game:GetService("TweenService")
+
+local function hit(pos, character, size)
+	local alreadyHit = {}
+
+	local hitBox = Instance.new("Part")
+	hitBox.Position = pos
+	hitBox.Size = size
+	hitBox.CanCollide = false
+	hitBox.Transparency = 1
+	hitBox.Shape = Enum.PartType.Ball
+	hitBox.Parent  = workspace
+	game.Debris:AddItem(hitBox, 0.1)
+
+	for _,  hit in pairs(workspace:GetPartsInPart(hitBox)) do
+		local hum = hit.Parent:FindFirstChildOfClass("Humanoid")
+		if hum and hum ~= character.Humanoid and hum.Health > 0 and not table.find(alreadyHit, hum) then
+			table.insert(alreadyHit, hum)
+			hum:TakeDamage(10)
+		end
+	end
+end
+
+replicatedStorage.castAbility.OnServerEvent:Connect(function(player, ability)
+	local character = player.Character
+	local hrpPart = character:WaitForChild("HumanoidRootPart")
+	local playerHum = character:WaitForChild("Humanoid")
+
+	if ability == "NatureSword" then
+		local newNatureSword = natureSword:Clone()
+		newNatureSword.Parent = workspace
+
+		local humanoid = newNatureSword:FindFirstChild("Humanoid")
+
+		local forward = hrpPart.CFrame.LookVector
+		local targetPosition = hrpPart.Position + forward * 12 + Vector3.new(0, 1, 0)
+
+		local offset = newNatureSword.Main.Position - newNatureSword:GetPivot().Position
+		newNatureSword:PivotTo(CFrame.new(targetPosition + offset, targetPosition + forward))
+
+		local animation = Instance.new("Animation")
+		animation.AnimationId = "rbxassetid://134201151225696"
+		local loadedAnim = humanoid:LoadAnimation(animation)
+
+		loadedAnim:Play()
+
+		loadedAnim:GetMarkerReachedSignal("Hit"):Connect(function()
+			local sound = script.Explosion:Clone()
+			sound.Parent = workspace
+			sound:Play()
+			game.Debris:AddItem(sound, 1)
+
+			replicatedStorage.abilityVfx:FireAllClients("Naturevfx", newNatureSword)
+
+			hit(newNatureSword.Main.Position, character, Vector3.new(15, 15, 15))
+		end)
+  end
+end)
