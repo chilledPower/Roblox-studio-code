@@ -1,0 +1,77 @@
+local character = script.Parent
+local hrpPart = character:WaitForChild("HumanoidRootPart")
+local humanoid = character:WaitForChild("Humanoid")
+
+local userInputService = game:GetService("UserInputService")
+local replicatedStorage = game:GetService("ReplicatedStorage")
+local tweenService = game:GetService("TweenService")
+local natureSword = replicatedStorage:WaitForChild("Nature Sword")
+
+local currentAbility = "NatureSword"
+
+local db = false
+
+userInputService.InputBegan:Connect(function(input)
+	if input.KeyCode == Enum.KeyCode.Q then
+		if db == false then
+			db = true
+			
+			replicatedStorage.castAbility:FireServer(currentAbility)
+
+			local animation = Instance.new("Animation")
+			animation.AnimationId = "rbxassetid://134744181167371"
+			local loadedAnim = humanoid:LoadAnimation(animation)
+
+			loadedAnim:Play()
+			
+			task.wait(2)
+			db = false
+		end
+	end
+end)
+
+replicatedStorage.abilityVfx.OnClientEvent:Connect(function(ability, abilityModel)
+	print("event fired")
+	if ability == "Naturevfx" then
+		abilityModel.Union.Transparency = 1
+		local size = Vector3.new(20, 20, 20)
+
+		local explosionPart = replicatedStorage:WaitForChild("explosionPart"):Clone()
+		explosionPart.Anchored = false
+		explosionPart.CanCollide = false
+		explosionPart.Position = abilityModel.Union.Position + Vector3.new(0, 1, 0)
+		explosionPart.Parent = abilityModel
+
+		local weldConstraint = Instance.new("WeldConstraint")
+		weldConstraint.Part0 = abilityModel.Main
+		weldConstraint.Part1 = explosionPart
+		weldConstraint.Parent = abilityModel
+
+		tweenService:Create(explosionPart, TweenInfo.new(0.4), {Size = size}):Play()
+		tweenService:Create(explosionPart, TweenInfo.new(0.4), {Transparency = 1}):Play()
+
+		local vfx = replicatedStorage.vfx:Clone()
+		for i, v in pairs(vfx:GetChildren()) do
+			if v:IsA("ParticleEmitter") then
+				v:Emit(15)
+			end
+		end
+		vfx.Position = explosionPart.Position
+		vfx.Anchored = true
+		vfx.Transparency = 1
+		vfx.Parent = workspace
+		game.Debris:AddItem(vfx, 0.8)
+
+		task.wait(0.4)
+		abilityModel:Destroy()
+	else
+		local ring = abilityModel:WaitForChild("Ring")
+		local beam = abilityModel:WaitForChild("Beam")
+		
+		tweenService:Create(ring, TweenInfo.new(0.4), {Transparency = 1}):Play()
+		tweenService:Create(beam, TweenInfo.new(0.4), {Transparency = 1}):Play()
+		
+		task.wait(0.4)
+		abilityModel:Destroy()
+	end
+end)
