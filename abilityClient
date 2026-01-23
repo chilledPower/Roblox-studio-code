@@ -1,3 +1,4 @@
+-- variables
 local character = script.Parent
 local hrpPart = character:WaitForChild("HumanoidRootPart")
 local humanoid = character:WaitForChild("Humanoid")
@@ -11,13 +12,16 @@ local currentAbility = "NatureSword"
 
 local db = false
 
+-- detect when player press Q on keyboard
+
 userInputService.InputBegan:Connect(function(input)
 	if input.KeyCode == Enum.KeyCode.Q then
 		if db == false then
 			db = true
-			
-			replicatedStorage.castAbility:FireServer(currentAbility)
 
+			-- send remoteEvent to show Ability/action
+			replicatedStorage.castAbility:FireServer(currentAbility)
+			-- play castAbility animation
 			local animation = Instance.new("Animation")
 			animation.AnimationId = "rbxassetid://134744181167371"
 			local loadedAnim = humanoid:LoadAnimation(animation)
@@ -30,26 +34,30 @@ userInputService.InputBegan:Connect(function(input)
 	end
 end)
 
+-- client side handling
 replicatedStorage.abilityVfx.OnClientEvent:Connect(function(ability, abilityModel)
 	print("event fired")
+	-- check if vfx is "Naturevfx" for nature sword ability. Depends on which ability is equipped
 	if ability == "Naturevfx" then
 		abilityModel.Union.Transparency = 1
 		local size = Vector3.new(20, 20, 20)
-
+		-- creating explosion part
 		local explosionPart = replicatedStorage:WaitForChild("explosionPart"):Clone()
 		explosionPart.Anchored = false
 		explosionPart.CanCollide = false
 		explosionPart.Position = abilityModel.Union.Position + Vector3.new(0, 1, 0)
 		explosionPart.Parent = abilityModel
-
+		-- create weldConstraint
 		local weldConstraint = Instance.new("WeldConstraint")
 		weldConstraint.Part0 = abilityModel.Main
 		weldConstraint.Part1 = explosionPart
 		weldConstraint.Parent = abilityModel
 
+		-- tweening explosionPart from small to big to make a explosion vfx
 		tweenService:Create(explosionPart, TweenInfo.new(0.4), {Size = size}):Play()
 		tweenService:Create(explosionPart, TweenInfo.new(0.4), {Transparency = 1}):Play()
 
+		-- adding particles
 		local vfx = replicatedStorage.vfx:Clone()
 		for i, v in pairs(vfx:GetChildren()) do
 			if v:IsA("ParticleEmitter") then
