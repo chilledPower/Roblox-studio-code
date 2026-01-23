@@ -14,7 +14,7 @@ local badges = require(configs:WaitForChild("Badges"))
 -- functions
 
 local function loadData(player)
-
+	-- making folders
 	local leaderstats = Instance.new("Folder", player)
 	leaderstats.Name = "leaderstats"
 
@@ -29,7 +29,8 @@ local function loadData(player)
 
 	local masteries = Instance.new("Folder", player)
 	masteries.Name = "Masteries"
-
+	
+	-- creating leaderstats (level,  rank, credits)
 	local level = Instance.new("NumberValue", leaderstats)
 	level.Name = "Level"
 	level.Value = 1
@@ -86,6 +87,7 @@ local function loadData(player)
 	
 	local data
 
+	-- catching data
 	local success, errorMsg = pcall(function()
 		data = dataStore:GetAsync(player.UserId)
 	end)
@@ -170,7 +172,8 @@ local function loadData(player)
 
 		replicatedStorage:WaitForChild("Remotes").SendData:FireClient(player, data)
 	end
-	
+
+	-- awarding player badges for certain amount of kills
 	if kills.Value >= 25 then
 		badges.AwardBadge(player, 698787811135500)
 	end
@@ -192,7 +195,8 @@ local function loadData(player)
 			maxExp.Value *= 1.5
 		end
 	end)
-	
+
+	-- awarding player streak badge
 	if streak.Value == 10 then
 		badges.AwardBadge(player, 1074865010728383)
 	end
@@ -200,7 +204,7 @@ end
 
 -- saving player data when left
 local function saveData(player)
-	local data = {}
+	local data = {asdwa}
 
 	data.Credits = player.leaderstats.Credits.Value
 	data.Level = player.leaderstats.Level.Value
@@ -253,4 +257,5 @@ game:BindToClose(function()
 	for _, player in pairs(players:GetChildren()) do
 		coroutine.wrap(saveData)(player)
 	end
+
 end)
