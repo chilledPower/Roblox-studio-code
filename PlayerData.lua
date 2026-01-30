@@ -169,7 +169,7 @@ end
 -- ACTIVE PROFILES TABLE
 local ActiveProfiles = {}
 
--- apply loaded data to player profile
+-- Apply loaded data to player profile
 local function applyData(profile, data)
 	if not data then return end
 
@@ -210,7 +210,7 @@ local function applyData(profile, data)
 end
 
 -- converting player stats into table for saving
--- This is useful because datastoreservice dosent save objects
+-- This is useful/needed because datastoreservice dosent save objects
 
 local function serialize(profile)
 	local data = {}
@@ -248,8 +248,8 @@ local function serialize(profile)
 	return data
 end
 
--- load player, apply loaded data,
---attach players leveling system, and award badges
+-- Load player, apply loaded data,
+-- Attach players leveling system, and award badges
 
 local function loadPlayer(player)
 	local profile = PlayerProfile.Create(player)
@@ -303,3 +303,4 @@ game:BindToClose(function()
 		savePlayer(player)
 	end
 end)
+
